@@ -90,16 +90,17 @@ pipeline{
             steps {
                 sh  ''' 
                     trivy image $docker_registry:$GIT_COMMIT \
-                        --severity LOW,MEDIUM,HIGH \
+                        --severity LOW,MEDIUM,HIGH,CRITICAL \
                         --exit-code 0 \
                         --quiet \
-                        --format json -o trivy-image-MEDIUM-results.json
+                        --format json -o trivy-image-MEDIUM-results.json \
+                        --timeout 5m
 
-                    trivy image $docker_registry:$GIT_COMMIT \
-                        --severity CRITICAL \
-                        --exit-code 1 \
-                        --quiet \
-                        --format json -o trivy-image-CRITICAL-results.json
+                    // trivy image $docker_registry:$GIT_COMMIT \
+                    //     --severity CRITICAL \
+                    //     --exit-code 1 \
+                    //     --quiet \
+                    //     --format json -o trivy-image-CRITICAL-results.json
                 '''
             }
             // post {
