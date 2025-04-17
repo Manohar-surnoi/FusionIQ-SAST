@@ -95,19 +95,22 @@ pipeline{
         stage('Trivy Vulnerability Scanner') {
             steps {
                 sh  ''' 
-                    trivy image $docker_registry:$GIT_COMMIT \
-                        --severity LOW,MEDIUM,HIGH \
-                        --exit-code 0 \
-                        --quiet \
-                        --format json -o trivy-image-MEDIUM-results.json \
-                        --timeout 2m
+    export TMPDIR=/var/tmp
 
-                    trivy image $docker_registry:$GIT_COMMIT \
-                        --severity CRITICAL \
-                        --exit-code 1 \
-                        --quiet \
-                        --format json -o trivy-image-CRITICAL-results.json
-                '''
+    trivy image $docker_registry:$GIT_COMMIT \
+        --severity LOW,MEDIUM,HIGH \
+        --exit-code 0 \
+        --quiet \
+        --format json -o trivy-image-MEDIUM-results.json \
+        --timeout 2m
+
+    trivy image $docker_registry:$GIT_COMMIT \
+        --severity CRITICAL \
+        --exit-code 1 \
+        --quiet \
+        --format json -o trivy-image-CRITICAL-results.json
+'''
+
             }
             // post {
             //     always {
