@@ -19,6 +19,12 @@ pipeline{
         choice(name: 'DeployToStage', choices: ['yes', 'no'], description: 'is it required Deploy to stage')
     }
     stages{
+        stage('check out code form git hub') {
+            steps {
+             git branch: 'master', credentialsId: 'git_access', url: 'https://github.com/Manohar-surnoi/FusionIQ-SAST.git'    
+            }
+        }
+        
         stage('Build and Package'){
             steps{
                 sh 'mvn clean package -DskipTests'
