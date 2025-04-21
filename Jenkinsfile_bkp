@@ -34,18 +34,27 @@ pipeline{
                 }
             }
             parallel{
-                stage('OWASP Dependency Check'){
+                stage('OWASP Dependency Check') {
                     steps {
-                        dependencyCheck additionalArguments: '''
-                            --scan \'./\' 
-                            --out \'./\'  
-                            --format \'ALL\' 
-                            --disableYarnAudit \
-                            --prettyPrint''',  nvdCredentialsId: 'NVD-API_KEY', odcInstallation: 'OWASP-DepCheck-10'
+                        script {
+                            dependencyCheck additionalArguments: '''
+                                --scan ./ 
+                                --out ./ 
+                                --format ALL 
+                                --disableYarnAudit 
+                                --prettyPrint
+                            ''',
+                            odcInstallation: 'OWASP-DepCheck-10',
+                            nvdCredentialsId: 'NVD-API_KEY'
 
-                        dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
-                    }
+                            sh 'ls -lh dependency-check-report.* || echo "No report found"'
+                        }
+
+                    // Publish the report
+                    dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
                 }
+        }
+
 
                 stage ("SAST - SonarQube") {
                     // currently skip test cases
