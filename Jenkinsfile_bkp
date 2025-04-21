@@ -81,8 +81,7 @@ pipeline{
                 }
             }
         }
-
-                
+               
         
         stage('containerization') {
             steps {
