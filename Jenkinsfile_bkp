@@ -50,28 +50,28 @@ pipeline{
                 dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
             }
         }
-        stage('SAST - SonarQube') {
-                when {
-                    expression { params.CodeAnalysisDependencyCheck == true }
-                }
-                steps {
-                    script {
-                        withSonarQubeEnv('sonarqube') {
-                            withCredentials([string(credentialsId: 'sonar-credentials', variable: 'SONAR_TOKEN')]) {
-                                withEnv(["PATH+SONAR=$SONAR_SCANNER_HOME/bin"]) {
-                                    sh '''
-                                        mvn clean verify sonar:sonar -DskipTests \
-                                            -Dsonar.projectKey=fusion-be \
-                                            -Dsonar.projectName='fusion-be' \
-                                            -Dsonar.host.url=$SONAR_HOST_URL \
-                                            -Dsonar.token=$SONAR_TOKEN
-                                    '''
-                                }
-                            }
-                        }
-                    }
-                }
-        }
+        // stage('SAST - SonarQube') {
+        //         when {
+        //             expression { params.CodeAnalysisDependencyCheck == true }
+        //         }
+        //         steps {
+        //             script {
+        //                 withSonarQubeEnv('sonarqube') {
+        //                     withCredentials([string(credentialsId: 'sonar-credentials', variable: 'SONAR_TOKEN')]) {
+        //                         withEnv(["PATH+SONAR=$SONAR_SCANNER_HOME/bin"]) {
+        //                             sh '''
+        //                                 mvn clean verify sonar:sonar -DskipTests \
+        //                                     -Dsonar.projectKey=fusion-be \
+        //                                     -Dsonar.projectName='fusion-be' \
+        //                                     -Dsonar.host.url=$SONAR_HOST_URL \
+        //                                     -Dsonar.token=$SONAR_TOKEN
+        //                             '''
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        // }
 
         // stage('Code Analysis and Testing'){
         //     when {
