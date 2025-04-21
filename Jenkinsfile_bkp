@@ -121,21 +121,29 @@ pipeline{
             post {
                 always {
                     sh '''
-                        trivy convert \
-                            --format template --template "@/usr/local/share/trivy/templates/html.tpl" \
-                            --output trivy-image-MEDIUM-results.html trivy-image-MEDIUM-results.json 
+            
+                            echo "Downloading Trivy report templates..."
 
-                        trivy convert \
-                            --format template --template "@/usr/local/share/trivy/templates/html.tpl" \
-                            --output trivy-image-CRITICAL-results.html trivy-image-CRITICAL-results.json
+                            curl -sSL -o html.tpl https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl
+                            curl -sSL -o junit.tpl https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/junit.tpl
 
-                        trivy convert \
-                            --format template --template "@/usr/local/share/trivy/templates/junit.tpl" \
-                            --output trivy-image-MEDIUM-results.xml  trivy-image-MEDIUM-results.json 
+                            echo "Generating Trivy HTML reports..."
 
-                        trivy convert \
-                            --format template --template "@/usr/local/share/trivy/templates/junit.tpl" \
-                            --output trivy-image-CRITICAL-results.xml trivy-image-CRITICAL-results.json          
+                            trivy convert --format template --template "$(pwd)/html.tpl" \
+                                --output trivy-image-MEDIUM-results.html trivy-image-MEDIUM-results.json 
+
+                            trivy convert --format template --template "$(pwd)/html.tpl" \
+                                --output trivy-image-CRITICAL-results.html trivy-image-CRITICAL-results.json
+
+                            echo "Generating Trivy JUnit XML reports..."
+
+                            trivy convert --format template --template "$(pwd)/junit.tpl" \
+                                --output trivy-image-MEDIUM-results.xml  trivy-image-MEDIUM-results.json 
+
+                            trivy convert --format template --template "$(pwd)/junit.tpl" \
+                                --output trivy-image-CRITICAL-results.xml trivy-image-CRITICAL-results.json
+                       
+         
                     '''
                 }
             }
