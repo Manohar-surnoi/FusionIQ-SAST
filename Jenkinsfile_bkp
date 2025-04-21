@@ -241,5 +241,4 @@ pipeline{
                 // Any specific actions for aborted jobs
             }    
         }
-    }
 }
