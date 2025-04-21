@@ -26,56 +26,102 @@ pipeline{
                 sh 'mvn clean package -DskipTests'
             }
         }
-
-        stage('Code Analysis and Testing'){
+        stage('OWASP Dependency Check') {
             when {
-                expression{
-                    params.CodeAnalysisDependencyCheck == true
-                }
+                expression { params.CodeAnalysisDependencyCheck == true }
             }
-            parallel{
-                stage('OWASP Dependency Check') {
-                    steps {
-                        script {
-                            dependencyCheck additionalArguments: '''
-                                --scan ./ 
-                                --out ./ 
-                                --format ALL 
-                                --disableYarnAudit 
-                                --prettyPrint
-                            ''',
-                            odcInstallation: 'OWASP-DepCheck-10',
-                            nvdCredentialsId: 'NVD-API_KEY'
+            steps {
+                script {
+                    dependencyCheck additionalArguments: '''
+                        --scan ./ 
+                        --out ./ 
+                        --format ALL 
+                        --disableYarnAudit 
+                        --prettyPrint
+                    ''',
+                    odcInstallation: 'OWASP-DepCheck-10',
+                    nvdCredentialsId: 'NVD-API_KEY'
 
-                            sh 'ls -lh dependency-check-report.* || echo "No report found"'
-                        }
-
-                    // Publish the report
-                    dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
+                    // Debug output to check if reports are created
+                    sh 'ls -lh dependency-check-report.* || echo "No report found"'
                 }
-                stage ("SAST - SonarQube") {
-                    // currently skip test cases
-                    steps {
-                        script {
-                            withSonarQubeEnv('sonarqube') {
-                                withCredentials([string(credentialsId: 'sonar-credentials', variable: 'SONAR_TOKEN')]){
-                                    withEnv(["PATH+SONAR=$SONAR_SCANNER_HOME/bin"]) {
-                                        sh '''
-                                            mvn clean verify sonar:sonar -DskipTests \
-                                                -Dsonar.projectKey=fusion-be \
-                                                -Dsonar.projectName='fusion-be' \
-                                                -Dsonar.host.url=$SONAR_HOST_URL \
-                                                -Dsonar.token=$SONAR_TOKEN
-                                        '''
-                                    }
+
+                // Publish the OWASP report
+                dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
+            }
+        }
+        stage('SAST - SonarQube') {
+                when {
+                    expression { params.CodeAnalysisDependencyCheck == true }
+                }
+                steps {
+                    script {
+                        withSonarQubeEnv('sonarqube') {
+                            withCredentials([string(credentialsId: 'sonar-credentials', variable: 'SONAR_TOKEN')]) {
+                                withEnv(["PATH+SONAR=$SONAR_SCANNER_HOME/bin"]) {
+                                    sh '''
+                                        mvn clean verify sonar:sonar -DskipTests \
+                                            -Dsonar.projectKey=fusion-be \
+                                            -Dsonar.projectName='fusion-be' \
+                                            -Dsonar.host.url=$SONAR_HOST_URL \
+                                            -Dsonar.token=$SONAR_TOKEN
+                                    '''
                                 }
                             }
                         }
                     }
                 }
-        }              
-            }
         }
+
+        // stage('Code Analysis and Testing'){
+        //     when {
+        //         expression{
+        //             params.CodeAnalysisDependencyCheck == true
+        //         }
+        //     }
+        //     parallel{
+        //         stage('OWASP Dependency Check') {
+        //             steps {
+        //                 script {
+        //                     dependencyCheck additionalArguments: '''
+        //                         --scan ./ 
+        //                         --out ./ 
+        //                         --format ALL 
+        //                         --disableYarnAudit 
+        //                         --prettyPrint
+        //                     ''',
+        //                     odcInstallation: 'OWASP-DepCheck-10',
+        //                     nvdCredentialsId: 'NVD-API_KEY'
+
+        //                     sh 'ls -lh dependency-check-report.* || echo "No report found"'
+        //                 }
+
+        //             // Publish the report
+        //             dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
+        //         }
+        //         stage ("SAST - SonarQube") {
+        //             // currently skip test cases
+        //             steps {
+        //                 script {
+        //                     withSonarQubeEnv('sonarqube') {
+        //                         withCredentials([string(credentialsId: 'sonar-credentials', variable: 'SONAR_TOKEN')]){
+        //                             withEnv(["PATH+SONAR=$SONAR_SCANNER_HOME/bin"]) {
+        //                                 sh '''
+        //                                     mvn clean verify sonar:sonar -DskipTests \
+        //                                         -Dsonar.projectKey=fusion-be \
+        //                                         -Dsonar.projectName='fusion-be' \
+        //                                         -Dsonar.host.url=$SONAR_HOST_URL \
+        //                                         -Dsonar.token=$SONAR_TOKEN
+        //                                 '''
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        // }              
+        //     }
+        // }
                
         
         stage('containerization') {
