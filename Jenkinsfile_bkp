@@ -53,9 +53,6 @@ pipeline{
                     // Publish the report
                     dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
                 }
-        }
-
-
                 stage ("SAST - SonarQube") {
                     // currently skip test cases
                     steps {
@@ -76,6 +73,7 @@ pipeline{
                         }
                     }
                 }
+        }              
             }
         }
                
