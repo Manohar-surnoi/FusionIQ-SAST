@@ -3,7 +3,7 @@ pipeline{
     tools{
         maven 'maven-3.9.8'
     }
-}
+
     environment {
         docker_registry = 'manohar9250/fusion-backend'
         DOCKERHUB_CREDENTIALS = credentials('docker-credentials')
@@ -239,5 +239,5 @@ pipeline{
                 // Any specific actions for aborted jobs
             }    
         }
+    }
 }
- 
