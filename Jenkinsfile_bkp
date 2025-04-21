@@ -27,56 +27,59 @@ pipeline{
             }
         }
 
-        stage('Code Analysis and Testing'){
+        stage('Code Analysis and Testing') {
             when {
-                expression{
+                expression {
                     params.CodeAnalysisDependencyCheck == true
                 }
             }
-            parallel{
-                stage('OWASP Dependency Check') {
-                    steps {
-                        script {
-                        dependencyCheck additionalArguments: '''
-                                --scan ./ 
-                                --out ./ 
-                                --format ALL 
-                                --disableYarnAudit 
-                                --prettyPrint
-                            ''',
-                            odcInstallation: 'OWASP-DepCheck-10',
-                            nvdCredentialsId: 'NVD-API_KEY'
+            steps {
+                script {
+                    parallel(
+                        "OWASP Dependency Check": {
+                            stage("OWASP Dependency Check") {
+                                steps {
+                                    script {
+                                        dependencyCheck additionalArguments: '''
+                                            --scan ./ 
+                                            --out ./ 
+                                            --format ALL 
+                                            --disableYarnAudit 
+                                            --prettyPrint
+                                        ''',
+                                        odcInstallation: 'OWASP-DepCheck-10',
+                                        nvdCredentialsId: 'NVD-API_KEY'
 
-                            // Optional: Show all generated reports
-                            sh 'ls -lh dependency-check-report.* || echo "No report found"'
-                        }
-
-                        // Publish the report (XML)
-                        dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
-                    }
-                }
-                stage ("SAST - SonarQube") {
-                    // currently skip test cases
-                    steps {
-                        script {
-                            withSonarQubeEnv('sonarqube') {
-                                withCredentials([string(credentialsId: 'sonar-credentials', variable: 'SONAR_TOKEN')]){
-                                    withEnv(["PATH+SONAR=$SONAR_SCANNER_HOME/bin"]) {
-                                        sh '''
-                                            mvn clean verify sonar:sonar -DskipTests \
-                                                -Dsonar.projectKey=fusion-be \
-                                                -Dsonar.projectName='fusion-be' \
-                                                -Dsonar.host.url=$SONAR_HOST_URL \
-                                                -Dsonar.token=$SONAR_TOKEN
-                                        '''
+                                        sh 'ls -lh dependency-check-report.* || echo "No report found"'
+                                    }
+                                    dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
+                                }
+                            }
+                        },
+                        "SAST - SonarQube": {
+                            stage("SAST - SonarQube") {
+                                steps {
+                                    script {
+                                        withSonarQubeEnv('sonarqube') {
+                                            withCredentials([string(credentialsId: 'sonar-credentials', variable: 'SONAR_TOKEN')]){
+                                                withEnv(["PATH+SONAR=$SONAR_SCANNER_HOME/bin"]) {
+                                                    sh '''
+                                                        mvn clean verify sonar:sonar -DskipTests \
+                                                            -Dsonar.projectKey=fusion-be \
+                                                            -Dsonar.projectName='fusion-be' \
+                                                            -Dsonar.host.url=$SONAR_HOST_URL \
+                                                            -Dsonar.token=$SONAR_TOKEN
+                                                    '''
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
+                    )
                 }
-
-
+            }
         }
 
                 
