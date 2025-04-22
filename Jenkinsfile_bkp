@@ -33,21 +33,15 @@ pipeline{
             steps {
                 script {
                     dependencyCheck additionalArguments: '''
-                        --scan ./ 
-                        --out ./ 
-                        --format ALL 
-                        --disableYarnAudit 
-                        --prettyPrint
-                    ''',
-                    odcInstallation: 'OWASP-DepCheck-10', nvdCredentialsId: 'NVD-API_KEY'
-
-                    // Debug output to check if reports are created
-                    sh 'ls -lh dependency-check-report.* || echo "No report found"'
-                }
-
-                // Publish the OWASP report
-                dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
+                            --scan \'./\' 
+                            --out \'./\'  
+                            --format \'ALL\' 
+                            --disableYarnAudit \
+                            --prettyPrint''',  nvdCredentialsId: 'NVD-API_KEY', odcInstallation: 'OWASP-DepCheck-10'
+ 
+                        dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
             }
+        }
         }
         // stage('SAST - SonarQube') {
         //         when {
@@ -290,3 +284,4 @@ pipeline{
         //     }    
         // }
 }
+
