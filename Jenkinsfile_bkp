@@ -33,10 +33,10 @@ pipeline{
             steps {
                 script {
                     dependencyCheck additionalArguments: '''
-                            --scan \'./\' 
-                            --out \'./\'  
-                            --format \'ALL\' 
-                            --disableYarnAudit \
+                            --scan ./ 
+                            --out ./  
+                            --format ALL 
+                            --disableYarnAudit
                             --prettyPrint
                             --noupdate
                             ''',  nvdCredentialsId: 'NVD-API_KEY', odcInstallation: 'OWASP-DepCheck-10'
