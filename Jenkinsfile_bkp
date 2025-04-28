@@ -37,7 +37,9 @@ pipeline{
                             --out \'./\'  
                             --format \'ALL\' 
                             --disableYarnAudit \
-                            --prettyPrint''',  nvdCredentialsId: 'NVD-API_KEY', odcInstallation: 'OWASP-DepCheck-10'
+                            --prettyPrint
+                            --noupdate
+                            ''',  nvdCredentialsId: 'NVD-API_KEY', odcInstallation: 'OWASP-DepCheck-10'
  
                         dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
             }
