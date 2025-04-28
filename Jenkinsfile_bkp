@@ -26,15 +26,16 @@ pipeline{
                 sh 'mvn clean package -DskipTests'
             }
         }
-         stage('OWASP Dependency Check') {
+        stage('OWASP Dependency Check') {
                     steps {
                             withCredentials([string(credentialsId: 'NVD-access', variable: 'NVD_API_KEY')]) {
                                 dependencyCheck additionalArguments: """
-                                    --scan ./ 
-                                    --out ./  
-                                    --format ALL 
-                                    --disableYarnAudit
+                                    --project FusionIQ-SAST-BE
+                                    --scan .
+                                    --format ALL
+                                    --out dependency-check-report
                                     --prettyPrint
+                                    --disableYarnAudit
                                     --noupdate                                    
                                 """, odcInstallation: 'OWASP-DepCheck-10'
                                dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
