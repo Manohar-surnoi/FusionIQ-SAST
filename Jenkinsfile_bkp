@@ -42,6 +42,7 @@ pipeline{
                     }
                 }
         }
+
         // stage('SAST - SonarQube') {
         //         when {
         //             expression { params.CodeAnalysisDependencyCheck == true }
@@ -252,7 +253,7 @@ pipeline{
         //         }
         //     }
         // }
-    }
+    
 
         // post { 
         //     always { 
