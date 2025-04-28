@@ -26,25 +26,21 @@ pipeline{
                 sh 'mvn clean package -DskipTests'
             }
         }
-        stage('OWASP Dependency Check') {
-            when {
-                expression { params.CodeAnalysisDependencyCheck == true }
-            }
-            steps {
-                script {
-                    dependencyCheck additionalArguments: '''
-                            --project FusionIQ-SAST-BE
-                            --scan /var/lib/jenkins/workspace/FusionIQ-SAST-BE
-                            --out ./dependency-check-report
-                            --format ALL
-                            --disableYarnAudit
-                            --prettyPrint
-                            --noupdate
-                            ''',  nvdCredentialsId: 'NVD-API_KEY', odcInstallation: 'OWASP-DepCheck-10'
- 
-                        dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
-            }
-        }
+         stage('OWASP Dependency Check') {
+                    steps {
+                            withCredentials([string(credentialsId: 'NVD-access', variable: 'NVD_API_KEY')]) {
+                                dependencyCheck additionalArguments: """
+                                    --scan ./ 
+                                    --out ./  
+                                    --format ALL 
+                                    --disableYarnAudit
+                                    --prettyPrint
+                                    --noupdate                                    
+                                """, odcInstallation: 'OWASP-DepCheck-10'
+                               dependencyCheckPublisher failedTotalCritical: 1, pattern: 'dependency-check-report.xml', stopBuild: false
+                        }
+                    }
+                }
         }
         // stage('SAST - SonarQube') {
         //         when {
