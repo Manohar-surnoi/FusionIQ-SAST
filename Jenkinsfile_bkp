@@ -33,9 +33,10 @@ pipeline{
             steps {
                 script {
                     dependencyCheck additionalArguments: '''
-                            --scan .
+                            --project FusionIQ-SAST-BE
+                            --scan /var/lib/jenkins/workspace/FusionIQ-SAST-BE
                             --out ./dependency-check-report
-                            --format ALL 
+                            --format ALL
                             --disableYarnAudit
                             --prettyPrint
                             --noupdate
